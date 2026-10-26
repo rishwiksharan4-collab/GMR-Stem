@@ -1,15 +1,17 @@
 {
   "name": "GMR STEM v1",
   "short_name": "GMR STEM",
+  "description": "GMR STEM Offline App",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#e05315",
   "icons": [
     {
-      "src": "https://rishwiksharan4-collab.github.io/gmr-stem/icon.png",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23e05315'/><text x='50%' y='55%' dominant-baseline='middle' text-anchor='middle' font-size='120' font-family='sans-serif' fill='white' font-weight='bold'>GMR</text></svg>",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }
