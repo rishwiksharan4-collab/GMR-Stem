@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>GMR STEM v1</title>
+  <style>
+    /* ==========================================
+       RESET & BASE OFFLINE STYLES
+       ========================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f3f4f6;
+      color: #1f2937;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* APP CONTAINER (MOBILE PROTOTYPE SIZE) */
+    #app {
+      max-width: 480px;
+      width: 100%;
+      margin: 0 auto;
+      background-color: #ffffff;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+      position: relative;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+      color: #ffffff;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .back-btn {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .back-btn:active {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .header-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-offline {
+      background-color: #10b981;
+      color: #ffffff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* MAIN CONTENT SCREEN WRAPPER */
+    main {
+      flex: 1;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      gap: 16px;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .screen.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CARD STYLING */
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      padding: 18px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .card-interactive {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .card-interactive:active {
+      transform: scale(0.98);
+      background-color: #f9fafb;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .card-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .icon-blue { background-color: #eff6ff; color: #2563eb; }
+    .icon-purple { background-color: #faf5ff; color: #9333ea; }
+    .icon-green { background-color: #f0fdf4; color: #16a34a; }
+    .icon-amber { background-color: #fffbeb; color: #d97706; }
+    .icon-red { background-color: #fef2f2; color: #dc2626; }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    .card-desc {
+      font-size: 0.875rem;
+      color: #6b7280;
+      line-height: 1.4;
+    }
+
+    /* SPECIAL VIDEO REDIRECT TILE */
+    .video-tile {
+      background: linear-gradient(135deg, #dc2626, #b91c1c);
+      color: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(220, 38, 38, 0.25);
+      margin-top: 8px;
+      text-decoration: none;
+    }
+
+    .video-tile:active {
+      transform: scale(0.98);
+      opacity: 0.95;
+    }
+
+    .video-tile-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .video-tile-title {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+
+    .video-notice {
+      font-size: 0.75rem;
+      color: #fecaca;
+      margin-top: 2px;
+    }
+
+    /* DIAGRAM & GRAPHICS CONTAINER */
+    .svg-container {
+      width: 100%;
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .svg-container svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+    /* LIST & BLANK SLOTS */
+    .blank-card {
+      border: 2px dashed #d1d5db;
+      background-color: #fafafa;
+      color: #9ca3af;
+      padding: 20px;
+      border-radius: 16px;
+      text-align: center;
+      font-style: italic;
+      font-size: 0.9rem;
+    }
+
+    .info-section {
+      margin-top: 8px;
+    }
+
+    .info-section h4 {
+      font-size: 0.95rem;
+      color: #374151;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .info-list {
+      list-style-type: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .info-list li {
+      background: #f9fafb;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-size: 0.875rem;
+      border-left: 3px solid #3b82f6;
+    }
+
+    /* FOOTER PROTOTYPE NOTE */
+    footer {
+      padding: 16px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: #9ca3af;
+      border-top: 1px solid #f3f4f6;
+      margin-top: auto;
+    }
+
+    /* SVG ICONS INLINE STYLES */
+    .icon-svg {
+      width: 24px;
+      height: 24px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+  <!-- GLOBAL HEADER -->
+  <header>
+    <div class="header-left">
+      <button id="backBtn" class="back-btn" onclick="navigateBack()" style="visibility: hidden;">
+        <svg class="icon-svg" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <div class="header-title" id="pageTitle">GMR STEM</div>
+    </div>
+    <span class="badge-offline">Offline</span>
+  </header>
+
+  <!-- MAIN NAVIGATION SCREENS -->
+  <main>
+
+    <!-- 1. DASHBOARD / HOME SCREEN -->
+    <div id="screen-home" class="screen active">
+      <div style="margin-bottom: 4px;">
+        <h2 style="font-size: 1.3rem; font-weight: 700; color: #111827;">Welcome</h2>
+        <p style="font-size: 0.875rem; color: #6b7280;">Select a center or lab to begin exploration:</p>
+      </div>
+
+      <!-- Tile 1: Nalanda Life Skill Center -->
+      <div class="card card-interactive" onclick="navigateTo('screen-skill-center', 'Nalanda Skill Center')">
+        <div class="card-header">
+          <div class="card-icon icon-purple">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
+          </div>
+          <div>
+            <div class="card-title">Nalanda Life Skill Center</div>
+            <div class="card-desc">Community skills, Shakti & Arogya Kendras</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tile 2: Computer Lab -->
+      <div class="card card-interactive" onclick="navigateTo('screen-computer-lab', 'Computer Lab')">
+        <div class="card-header">
+          <div class="card-icon icon-blue">
+            <svg class="icon-svg" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          </div>
+          <div>
+            <div class="card-title">Computer Lab</div>
+            <div class="card-desc">Digital literacy, usage guides & tutorials</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tile 3: Science Lab -->
+      <div class="card card-interactive" onclick="navigateTo('screen-science-lab', 'Science Lab')">
+        <div class="card-header">
+          <div class="card-icon icon-green">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M10 2v7.527a2 2 0 0 1-.211.896L4.72 20.55A1 1 0 0 0 5.611 22h12.778a1 1 0 0 0 .89-1.45l-5.068-10.127A2 2 0 0 1 14 9.527V2"></path><line x1="8.5" y1="2" x2="15.5" y2="2"></line></svg>
+          </div>
+          <div>
+            <div class="card-title">Science Lab</div>
+            <div class="card-desc">Scientific apparatus & practical experiments</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tile 4: Library -->
+      <div class="card card-interactive" onclick="navigateTo('screen-library', 'Library')">
+        <div class="card-header">
+          <div class="card-icon icon-amber">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          </div>
+          <div>
+            <div class="card-title">Library</div>
+            <div class="card-desc">Book catalog, borrowing rules & quiet space</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 2. NALANDA LIFE SKILL CENTER SCREEN -->
+    <div id="screen-skill-center" class="screen">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-purple">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+          </div>
+          <div>
+            <div class="card-title">Kendras Overview</div>
+            <div class="card-desc">Empowering local communities with essential skills and wellness programs.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h4>Available Kendras</h4>
+      </div>
+
+      <!-- Shakti Kendra -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-amber">
+            <svg class="icon-svg" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+          </div>
+          <div>
+            <div class="card-title">Shakti Kendra</div>
+            <div class="card-desc">Women Empowerment & Skill Development</div>
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: #4b5563; line-height: 1.5;">
+          Focused on vocational training, financial literacy, leadership workshops, and self-reliance skills designed to uplift women in the community.
+        </p>
+      </div>
+
+      <!-- Arogya Kendra -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-green">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+          </div>
+          <div>
+            <div class="card-title">Arogya Kendra</div>
+            <div class="card-desc">Health, Hygiene & Community Wellness</div>
+          </div>
+        </div>
+        <p style="font-size: 0.85rem; color: #4b5563; line-height: 1.5;">
+          Dedicated to health awareness, preventative care guidance, routine health check-up camps, and nutrition education for families.
+        </p>
+      </div>
+    </div>
+
+
+    <!-- 3. COMPUTER LAB SCREEN -->
+    <div id="screen-computer-lab" class="screen">
+      <div class="card">
+        <div class="card-title" style="font-size: 1.15rem;">Uses of a Computer</div>
+        <p style="font-size: 0.875rem; color: #4b5563;">Computers are fundamental tools modern learning and communication. Here are the primary uses:</p>
+      </div>
+
+      <div class="info-section">
+        <ul class="info-list">
+          <li><strong>1. Education & Research:</strong> Accessing learning material, conducting online research, and digital reading.</li>
+          <li><strong>2. Digital Literacy:</strong> Learning typing, document creation, spreadsheets, and presentation tools.</li>
+          <li><strong>3. Communication:</strong> Sending emails, video calls, and collaborating on digital projects.</li>
+          <li><strong>4. Problem Solving & Logic:</strong> Programming basics, logical thinking, and data processing.</li>
+        </ul>
+      </div>
+
+      <!-- Redirection Tile -->
+      <div class="video-tile" onclick="openYouTube('https://www.youtube.com/results?search_query=how+to+use+a+computer+for+beginners')">
+        <div class="video-tile-content">
+          <svg class="icon-svg" viewBox="0 0 24 24" style="width: 28px; height: 28px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <div>
+            <div class="video-tile-title">How to use it ?</div>
+            <div class="video-notice">Tap to open video tutorial (Requires Internet)</div>
+          </div>
+        </div>
+        <svg class="icon-svg" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+    </div>
+
+
+    <!-- 4. SCIENCE LAB SCREEN -->
+    <div id="screen-science-lab" class="screen">
+      <div style="margin-bottom: 4px;">
+        <h3 style="font-size: 1.1rem; font-weight: 600;">Apparatus & Equipment</h3>
+        <p style="font-size: 0.85rem; color: #6b7280;">Select an item to view details or add a new topic:</p>
+      </div>
+
+      <!-- Option 1: Microscope -->
+      <div class="card card-interactive" onclick="navigateTo('screen-microscope-detail', 'Microscope Details')">
+        <div class="card-header">
+          <div class="card-icon icon-green">
+            <svg class="icon-svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"></path></svg>
+          </div>
+          <div>
+            <div class="card-title">1. Microscope</div>
+            <div class="card-desc">Compound optical microscope structure & operating guide</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Dynamic Custom Added Items Container -->
+      <div id="customEquipmentList"></div>
+
+      <!-- Option 2 / Add New Module Card -->
+      <div class="card" style="border: 2px dashed #3b82f6; background-color: #f0f9ff;">
+        <div class="card-title" style="color: #1e40af; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+          <svg class="icon-svg" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          + Add New Equipment / Topic
+        </div>
+        <p style="font-size: 0.8rem; color: #4b5563;">Type equipment name (e.g. Telescope, Bunsen Burner) to auto-generate a topic module:</p>
+        <div style="display: flex; gap: 8px; margin-top: 6px;">
+          <input type="text" id="newItemInput" placeholder="e.g. Telescope" style="flex: 1; padding: 10px 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.9rem; outline: none;">
+          <button onclick="addNewScienceEquipment()" style="background: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 8px; font-weight: 600; cursor: pointer;">Add</button>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 5. MICROSCOPE DETAIL SCREEN -->
+    <div id="screen-microscope-detail" class="screen">
+      <!-- Embedded SVG Diagram of Microscope (100% Offline Compatible) -->
+      <div class="svg-container">
+        <svg width="200" height="220" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Base -->
+          <path d="M40 200 H160 C160 200 150 185 130 185 H70 C50 185 40 200 40 200 Z" fill="#334155"/>
+          <!-- Pillar & Arm -->
+          <path d="M120 185 V120 C120 80 140 60 120 40 H95 V55 H105 C115 70 105 100 105 120 V185" fill="#475569"/>
+          <!-- Stage -->
+          <rect x="55" y="125" width="70" height="8" rx="2" fill="#1e293b"/>
+          <rect x="75" y="133" width="30" height="12" fill="#64748b"/>
+          <!-- Eyepiece Tube -->
+          <rect x="75" y="30" width="20" height="40" rx="3" fill="#0f172a" transform="rotate(-15 85 50)"/>
+          <!-- Eyepiece Lens Top -->
+          <rect x="72" y="20" width="26" height="10" rx="2" fill="#94a3b8" transform="rotate(-15 85 25)"/>
+          <!-- Revolving Nosepiece -->
+          <path d="M70 75 L110 75 L100 88 L80 88 Z" fill="#334155"/>
+          <!-- Objective Lenses -->
+          <rect x="75" y="88" width="8" height="22" fill="#0284c7"/>
+          <rect x="90" y="88" width="10" height="28" fill="#0369a1"/>
+          <!-- Focus Adjustment Knob -->
+          <circle cx="125" cy="130" r="12" fill="#94a3b8"/>
+          <circle cx="125" cy="130" r="6" fill="#475569"/>
+          <!-- Specimen Slide on Stage -->
+          <rect x="70" y="123" width="35" height="3" fill="#38bdf8"/>
+          <!-- Text Labels inside SVG -->
+          <text x="100" y="15" font-size="11" font-weight="bold" fill="#0f172a" text-anchor="middle">Compound Microscope</text>
+        </svg>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Microscope Components</div>
+        <p style="font-size: 0.85rem; color: #4b5563;">An optical instrument used to magnify small objects that cannot be seen with the naked eye.</p>
+      </div>
+
+      <div class="info-section">
+        <h4>Key Parts & Functions</h4>
+        <ul class="info-list">
+          <li><strong>Eyepiece (Ocular Lens):</strong> The lens at the top that you look through (usually 10x magnification).</li>
+          <li><strong>Objective Lenses:</strong> Primary lenses yielding 4x, 10x, or 40x magnification.</li>
+          <li><strong>Stage & Clips:</strong> The flat platform where slides are placed and secured.</li>
+          <li><strong>Coarse/Fine Focus Knobs:</strong> Used to adjust the clarity and focus of the specimen image.</li>
+        </ul>
+      </div>
+
+      <!-- Redirection Tile for Microscope Video -->
+      <div class="video-tile" onclick="openYouTube('https://www.youtube.com/results?search_query=how+to+use+a+microscope+step+by+step')">
+        <div class="video-tile-content">
+          <svg class="icon-svg" viewBox="0 0 24 24" style="width: 28px; height: 28px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <div>
+            <div class="video-tile-title">How to use it ?</div>
+            <div class="video-notice">Tap to open video tutorial (Requires Internet)</div>
+          </div>
+        </div>
+        <svg class="icon-svg" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+    </div>
+
+
+    <!-- 5B. DYNAMICALLY GENERATED EQUIPMENT DETAIL SCREEN -->
+    <div id="screen-dynamic-detail" class="screen">
+      <div id="dynamicContentContainer"></div>
+    </div>
+
+
+    <!-- 6. LIBRARY SCREEN -->
+    <div id="screen-library" class="screen">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-icon icon-amber">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+          </div>
+          <div>
+            <div class="card-title">Library</div>
+            <div class="card-desc">Resource center for books, study materials, and quiet learning.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="info-section">
+        <h4>Library Services</h4>
+        <ul class="info-list">
+          <li><strong>Book Catalog:</strong> Reference books, textbooks, literature, and magazines.</li>
+          <li><strong>Borrowing Rules:</strong> Up to 2 books per student for 14 days.</li>
+          <li><strong>Study Space:</strong> Silent reading zones available daily from 10:00 AM to 3:30 PM.</li>
+        </ul>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer>
+    GMR STEM v1 &bull; Offline Ready
+  </footer>
+</div>
+
+<!-- SINGLE-PAGE SPA NAVIGATION LOGIC -->
+<script>
+  // Navigation stack for handling back button state
+  const navStack = [{ id: 'screen-home', title: 'GMR STEM' }];
+  
+  // Custom Dynamic Equipment Store (In-Memory with LocalStorage persistence)
+  let customEquipment = [];
+
+  try {
+    const saved = localStorage.getItem('gmr_custom_equipment');
+    if (saved) {
+      customEquipment = JSON.parse(saved);
+    }
+  } catch (e) {
+    console.log('LocalStorage unavailable, using in-memory store.');
+  }
+
+  function saveCustomEquipment() {
+    try {
+      localStorage.setItem('gmr_custom_equipment', JSON.stringify(customEquipment));
+    } catch(e) {}
+  }
+
+  function renderCustomEquipmentList() {
+    const container = document.getElementById('customEquipmentList');
+    if (!container) return;
+    container.innerHTML = '';
+
+    customEquipment.forEach((item, index) => {
+      const itemCard = document.createElement('div');
+      itemCard.className = 'card card-interactive';
+      itemCard.style.position = 'relative';
+      itemCard.innerHTML = `
+        <div class="card-header" onclick="viewDynamicItem(${index})">
+          <div class="card-icon icon-blue">
+            <svg class="icon-svg" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+          </div>
+          <div style="flex: 1;">
+            <div class="card-title">${index + 2}. ${escapeHtml(item.name)}</div>
+            <div class="card-desc">Auto-generated module & usage guide</div>
+          </div>
+        </div>
+        <button onclick="event.stopPropagation(); deleteDynamicItem(${index});" style="position: absolute; top: 12px; right: 12px; background: none; border: none; color: #ef4444; font-size: 0.8rem; font-weight: 600; cursor: pointer; padding: 4px;">Delete</button>
+      `;
+      container.appendChild(itemCard);
+    });
+  }
+
+  function addNewScienceEquipment() {
+    const input = document.getElementById('newItemInput');
+    const name = input.value.trim();
+    if (!name) {
+      alert("Please enter a valid item or apparatus name.");
+      return;
+    }
+
+    const newItem = {
+      id: Date.now(),
+      name: name,
+      dateAdded: new Date().toLocaleDateString()
+    };
+
+    customEquipment.push(newItem);
+    saveCustomEquipment();
+    renderCustomEquipmentList();
+    input.value = '';
+
+    // Automatically navigate to view the newly created topic detail
+    viewDynamicItem(customEquipment.length - 1);
+  }
+
+  function deleteDynamicItem(index) {
+    customEquipment.splice(index, 1);
+    saveCustomEquipment();
+    renderCustomEquipmentList();
+  }
+
+  function viewDynamicItem(index) {
+    const item = customEquipment[index];
+    if (!item) return;
+
+    const container = document.getElementById('dynamicContentContainer');
+    const searchUrl = `https://www.youtube.com/results?search_query=how+to+use+${encodeURIComponent(item.name)}+step+by+step`;
+
+    container.innerHTML = `
+      <div class="svg-container">
+        <svg width="180" height="180" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="100" cy="100" r="80" fill="#e0f2fe" stroke="#0284c7" stroke-width="4"/>
+          <path d="M100 50 V150 M50 100 H150" stroke="#0369a1" stroke-width="6" stroke-linecap="round"/>
+          <circle cx="100" cy="100" r="30" fill="#38bdf8"/>
+          <text x="100" y="180" font-size="12" font-weight="bold" fill="#0369a1" text-anchor="middle">${escapeHtml(item.name)}</text>
+        </svg>
+      </div>
+
+      <div class="card">
+        <div class="card-title">${escapeHtml(item.name)} - Overview & Key Uses</div>
+        <p style="font-size: 0.9rem; color: #374151; line-height: 1.6; text-align: justify;">
+          The <strong>${escapeHtml(item.name)}</strong> is an essential piece of laboratory equipment used across STEM disciplines for hands-on experimentation, scientific discovery, and analytical observation. It plays a pivotal role in aiding students and researchers to perform controlled tests, observe physical or chemical reactions, and collect accurate practical data. By integrating the <strong>${escapeHtml(item.name)}</strong> into regular laboratory activities, learners build strong foundational skills in scientific inquiry, standard experimental procedures, and safety compliance while bridging theoretical classroom knowledge with real-world application.
+        </p>
+      </div>
+
+      <div class="info-section">
+        <h4>Step-by-Step Operating Guide</h4>
+        <ul class="info-list" style="border-left-color: #10b981;">
+          <li><strong>Step 1: Inspect Equipment:</strong> Clean and check ${escapeHtml(item.name)} for any damage or cracks before use.</li>
+          <li><strong>Step 2: Setup:</strong> Place securely on a flat, stable lab table surface.</li>
+          <li><strong>Step 3: Execution:</strong> Follow standard experiment procedures while wearing appropriate protective gear.</li>
+          <li><strong>Step 4: Maintenance:</strong> Clean carefully and store back in designated lab storage after use.</li>
+        </ul>
+      </div>
+
+      <div class="video-tile" onclick="openYouTube('${searchUrl}')">
+        <div class="video-tile-content">
+          <svg class="icon-svg" viewBox="0 0 24 24" style="width: 28px; height: 28px;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+          <div>
+            <div class="video-tile-title">How to use ${escapeHtml(item.name)} ?</div>
+            <div class="video-notice">Tap to open search video tutorial on YouTube</div>
+          </div>
+        </div>
+        <svg class="icon-svg" viewBox="0 0 24 24" style="width: 20px; height: 20px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </div>
+    `;
+
+    navigateTo('screen-dynamic-detail', `${item.name} Details`);
+  }
+
+  function escapeHtml(text) {
+    return text.replace(/[&<>"']/g, function(m) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+    });
+  }
+
+  function navigateTo(screenId, title) {
+    const currentScreen = navStack[navStack.length - 1];
+    if (currentScreen.id === screenId) return;
+
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+
+    const targetEl = document.getElementById(screenId);
+    if (targetEl) {
+      targetEl.classList.add('active');
+    }
+
+    navStack.push({ id: screenId, title: title });
+    updateHeaderUI();
+    window.scrollTo(0, 0);
+  }
+
+  function navigateBack() {
+    if (navStack.length <= 1) return;
+
+    navStack.pop();
+    const prevScreen = navStack[navStack.length - 1];
+
+    document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+
+    const targetEl = document.getElementById(prevScreen.id);
+    if (targetEl) {
+      targetEl.classList.add('active');
+    }
+
+    updateHeaderUI();
+    window.scrollTo(0, 0);
+  }
+
+  function updateHeaderUI() {
+    const current = navStack[navStack.length - 1];
+    const backBtn = document.getElementById('backBtn');
+    const pageTitle = document.getElementById('pageTitle');
+
+    pageTitle.textContent = current.title;
+
+    if (navStack.length > 1) {
+      backBtn.style.visibility = 'visible';
+    } else {
+      backBtn.style.visibility = 'hidden';
+    }
+  }
+
+  function openYouTube(url) {
+    if (navigator.onLine === false) {
+      alert("Note: Device is currently offline. Connect to internet to search or watch videos on YouTube.");
+    }
+    window.open(url, '_blank');
+  }
+
+  // Initialize custom equipment list on load
+  document.addEventListener('DOMContentLoaded', function() {
+    renderCustomEquipmentList();
+  });
+
+  document.addEventListener('backbutton', function (e) {
+    if (navStack.length > 1) {
+      e.preventDefault();
+      navigateBack();
+    }
+  }, false);
+</script>
+
+</body>
+</html>
