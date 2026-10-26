@@ -1,0 +1,15 @@
+{
+  "name": "GMR STEM v1",
+  "short_name": "GMR STEM",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#e05315",
+  "icons": [
+    {
+      "src": "https://rishwiksharan4-collab.github.io/gmr-stem/icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
